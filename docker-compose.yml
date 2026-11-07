@@ -1,0 +1,31 @@
+services:
+  rankforge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rankforge:latest
+    container_name: rankforge_engine
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - LOG_LEVEL=INFO
+      - EMBEDDING_DIM=64
+      - INDEX_BACKEND=auto
+      - MAX_INDEX_CAPACITY=100000
+      - RANDOM_SEED=42
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request, sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').getcode() == 200 else 1)\""]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+
